@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "926223499030",
+    "project_id": "ao-scan-global-companion",
+    "storage_bucket": "ao-scan-global-companion.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:926223499030:android:89714545e4d33d75f59a37",
+        "android_client_info": {
+          "package_name": "com.aoscanglobal.aoscanapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBbij4eUyO-fcFBrEpA1bwL2-nOHdc-yMQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

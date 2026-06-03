@@ -1,0 +1,10 @@
+# Flutter Project Rules
+- Always use GetX for state management.
+- Prefer Get.put() for controllers.
+- Use GetMaterialApp instead of MaterialApp.
+- Use camelCase for variables and methods.
+- Use PascalCase for classes.
+- use custom text style like apptext.regular/bold text styles in text widget in app_textstyle.dart file in utills
+- use colors from appColors class in seperate app_colors.dart file in utills folder
+- create common widgets which are reusable in lib/views/widgets/
+- always use mediaQuery size for hight and width of the screen so design looks responsive
