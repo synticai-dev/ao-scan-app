@@ -4,6 +4,7 @@ import 'package:ao_scan_app/utils/app_colors.dart';
 import 'package:ao_scan_app/utils/app_textstyle.dart';
 import 'package:ao_scan_app/views/screens/auth/login_screen.dart';
 import 'package:ao_scan_app/views/screens/demo_form_screen.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:ao_scan_app/views/screens/webview_screen.dart';
 import 'package:ao_scan_app/views/screens/demo_request_details_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -26,6 +27,19 @@ class DashboardScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF0F4FD),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          final uri = Uri.parse(
+            'https://tawk.to/chat/647b63247957702c744b9614/1h20vmhkl',
+          );
+          if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+            throw 'Could not launch Tawk chat';
+          }
+        },
+        backgroundColor: const Color(0xFF059669),
+        elevation: 4,
+        child: const Icon(Icons.chat_bubble_rounded, color: Colors.white),
+      ),
       body: Obx(() {
         if (!authController.isLoggedIn) return _loginRequired();
         final user = authController.userModel.value;

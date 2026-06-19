@@ -8,6 +8,7 @@ import 'package:flutter/gestures.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'demo_form_screen.dart';
+import 'chat_screen.dart';
 import 'webview_screen.dart';
 import 'dashboard_screen.dart';
 import 'auth/login_screen.dart';
@@ -131,6 +132,24 @@ class HomeScreen extends StatelessWidget {
                       text: 'Resources Hub',
                       onPressed: () {
                         Get.to(() => SocialLinksScreen());
+                      },
+                      size: size,
+                    ),
+
+                    SizedBox(height: size.height * 0.015),
+                    _buildGreenButton(
+                      context: context,
+                      text: 'Live Chat',
+                      onPressed: () async {
+                        final uri = Uri.parse(
+                          'https://tawk.to/chat/647b63247957702c744b9614/1h20vmhkl',
+                        );
+                        if (!await launchUrl(
+                          uri,
+                          mode: LaunchMode.externalApplication,
+                        )) {
+                          throw 'Could not launch Tawk chat';
+                        }
                       },
                       size: size,
                     ),
@@ -269,6 +288,37 @@ class HomeScreen extends StatelessWidget {
               color: AppColors.buttonPrimary,
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGreenButton({
+    required BuildContext context,
+    required String text,
+    required VoidCallback onPressed,
+    required Size size,
+  }) {
+    return SizedBox(
+      width: size.width * 0.88,
+      height: size.height * 0.06,
+      child: ElevatedButton.icon(
+        onPressed: onPressed,
+        icon: const Icon(Icons.chat_bubble_rounded, size: 20),
+        label: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            text,
+            textAlign: TextAlign.center,
+            style: AppTextStyle.bold(fontSize: 16, color: Colors.white),
+          ),
+        ),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFF059669),
+          foregroundColor: Colors.white,
+          elevation: 2,
+          shadowColor: const Color(0xFF059669).withOpacity(0.4),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
       ),
     );
