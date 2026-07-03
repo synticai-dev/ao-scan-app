@@ -4,6 +4,7 @@ import 'package:ao_scan_app/utils/app_colors.dart';
 import 'package:ao_scan_app/utils/app_textstyle.dart';
 import 'package:ao_scan_app/views/screens/auth/login_screen.dart';
 import 'package:ao_scan_app/views/screens/demo_form_screen.dart';
+import 'package:ao_scan_app/views/screens/about_demo_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:ao_scan_app/views/screens/webview_screen.dart';
 import 'package:ao_scan_app/views/screens/demo_request_details_screen.dart';
@@ -55,13 +56,13 @@ class DashboardScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _statsRow(user?.uid ?? ''),
-                    const SizedBox(height: 24),
                     _profileCard(user),
                     const SizedBox(height: 24),
                     _requestsSection(),
                     const SizedBox(height: 24),
-                    _bookDemoBanner(),
+                    Obx(() => authController.hasSubmittedDemo.value
+                        ? const SizedBox.shrink()
+                        : _bookDemoBanner()),
                     const SizedBox(height: 24),
                     _footer(context),
                     const SizedBox(height: 40),
@@ -249,59 +250,72 @@ class DashboardScreen extends StatelessWidget {
                     const SizedBox(height: 24),
 
                     // Premium Quick Action Pill
-                    GestureDetector(
-                      onTap: () => Get.to(() => const DemoFormScreen()),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 12,
-                        ),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              Colors.white.withOpacity(0.15),
-                              Colors.white.withOpacity(0.05),
+                    Obx(() {
+                      final hasDemo = authController.hasSubmittedDemo.value;
+                      return GestureDetector(
+                        onTap: () {
+                          if (hasDemo) {
+                            Get.to(() => const AboutDemoMenuScreen());
+                          } else {
+                            Get.to(() => const DemoFormScreen());
+                          }
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 12,
+                          ),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                Colors.white.withOpacity(0.15),
+                                Colors.white.withOpacity(0.05),
+                              ],
+                            ),
+                            borderRadius: BorderRadius.circular(32),
+                            border: Border.all(
+                              color: Colors.white.withOpacity(0.2),
+                              width: 1,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.1),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
                             ],
                           ),
-                          borderRadius: BorderRadius.circular(32),
-                          border: Border.all(
-                            color: Colors.white.withOpacity(0.2),
-                            width: 1,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 10,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(
-                              Icons.add_circle_outline_rounded,
-                              color: Colors.white,
-                              size: 18,
-                            ),
-                            const SizedBox(width: 10),
-                            Text(
-                              'REQUEST FREE DEMO',
-                              style: AppTextStyle.bold(
-                                fontSize: 13,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                hasDemo
+                                    ? Icons.info_outline_rounded
+                                    : Icons.add_circle_outline_rounded,
                                 color: Colors.white,
-                              ).copyWith(letterSpacing: 0.5),
-                            ),
-                            const SizedBox(width: 6),
-                            Icon(
-                              Icons.arrow_forward_ios_rounded,
-                              color: Colors.white.withOpacity(0.5),
-                              size: 12,
-                            ),
-                          ],
+                                size: 18,
+                              ),
+                              const SizedBox(width: 10),
+                              Text(
+                                hasDemo
+                                    ? 'ABOUT YOUR AO SCAN DEMO'
+                                    : 'REQUEST FREE DEMO',
+                                style: AppTextStyle.bold(
+                                  fontSize: 13,
+                                  color: Colors.white,
+                                ).copyWith(letterSpacing: 0.5),
+                              ),
+                              const SizedBox(width: 6),
+                              Icon(
+                                Icons.arrow_forward_ios_rounded,
+                                color: Colors.white.withOpacity(0.5),
+                                size: 12,
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ),
+                      );
+                    }),
                   ],
                 ),
               ),
@@ -563,7 +577,7 @@ class DashboardScreen extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Demo Requests',
+          'Free Demo',
           style: AppTextStyle.bold(fontSize: 17, color: AppColors.darkBlue),
         ),
         const SizedBox(height: 12),
@@ -574,6 +588,7 @@ class DashboardScreen extends StatelessWidget {
                 'userId',
                 isEqualTo: authController.firebaseUser.value?.uid,
               )
+              .limit(1)
               .snapshots(),
           builder: (context, snap) {
             if (snap.connectionState == ConnectionState.waiting) {
@@ -588,20 +603,11 @@ class DashboardScreen extends StatelessWidget {
               );
             }
             if (!snap.hasData || snap.data!.docs.isEmpty) return _emptyState();
-            final docs = snap.data!.docs;
-            final count = docs.length > 3 ? 3 : docs.length;
-            return ListView.separated(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              padding: EdgeInsets.zero,
-              itemCount: count,
-              separatorBuilder: (_, __) => const SizedBox(height: 10),
-              itemBuilder: (context, i) {
-                final data = docs[i].data() as Map<String, dynamic>;
-                data['id'] = docs[i].id;
-                return _requestCard(DemoRequestModel.fromMap(data));
-              },
-            );
+            final doc = snap.data!.docs.first;
+            final data = doc.data() as Map<String, dynamic>;
+            data['id'] = doc.id;
+            final request = DemoRequestModel.fromMap(data);
+            return _requestCard(request);
           },
         ),
       ],

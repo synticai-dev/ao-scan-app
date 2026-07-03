@@ -8,6 +8,7 @@ import 'package:flutter/gestures.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'demo_form_screen.dart';
+import 'about_demo_screen.dart';
 import 'chat_screen.dart';
 import 'webview_screen.dart';
 import 'dashboard_screen.dart';
@@ -67,16 +68,25 @@ class HomeScreen extends StatelessWidget {
                     ),
                     SizedBox(height: size.height * 0.05),
 
-                    // Buttons Section
-                    _buildOutlinedButton(
-                      context: context,
-                      text: 'Free AO Scan Demo',
-                      onPressed: () {
-                        controller.resetForm();
-                        Get.to(() => const DemoFormScreen());
-                      },
-                      size: size,
-                    ),
+                    // Free Demo / About Your AO Scan Demo button
+                    Obx(() {
+                      final hasDemo = authController.hasSubmittedDemo.value;
+                      return _buildOutlinedButton(
+                        context: context,
+                        text: hasDemo
+                            ? 'About Your AO Scan Demo'
+                            : 'Free AO Scan Demo',
+                        onPressed: () {
+                          if (hasDemo) {
+                            Get.to(() => const AboutDemoMenuScreen());
+                          } else {
+                            controller.resetForm();
+                            Get.to(() => const DemoFormScreen());
+                          }
+                        },
+                        size: size,
+                      );
+                    }),
 
                     SizedBox(height: size.height * 0.02),
 

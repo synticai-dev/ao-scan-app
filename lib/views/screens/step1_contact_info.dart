@@ -353,6 +353,8 @@ class Step1ContactInfo extends StatelessWidget {
                     if (val != null) {
                       unitValue.value = val;
                       valueController.clear(); // 🔥 prevent crash
+                      // Force re-validation of the form since the value was cleared
+                      _formKey.currentState?.validate();
                     }
                   },
                 ),

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:ao_scan_app/utils/analytics_service.dart';
 import 'package:ao_scan_app/models/user_model.dart';
 import 'package:ao_scan_app/utils/notification_service.dart';
@@ -16,6 +17,10 @@ class AuthController extends GetxController {
   Rx<UserModel?> userModel = Rx<UserModel?>(null);
   RxBool isLoading = false.obs;
 
+  /// Tracks whether the current user has already submitted a free demo request.
+  RxBool hasSubmittedDemo = false.obs;
+  StreamSubscription<QuerySnapshot>? _demoSubscription;
+
   @override
   void onInit() {
     super.onInit();
@@ -28,10 +33,27 @@ class AuthController extends GetxController {
       await _fetchUserModel(user.uid);
       await updateFcmToken();
       await AnalyticsService.setUserId(user.uid);
+      _listenToDemoRequests(user.uid);
     } else {
       userModel.value = null;
+      hasSubmittedDemo.value = false;
+      _demoSubscription?.cancel();
+      _demoSubscription = null;
       await AnalyticsService.setUserId(null);
     }
+  }
+
+  /// Listens to demo_requests for the current user and updates [hasSubmittedDemo].
+  void _listenToDemoRequests(String uid) {
+    _demoSubscription?.cancel();
+    _demoSubscription = _firestore
+        .collection('demo_requests')
+        .where('userId', isEqualTo: uid)
+        .limit(1)
+        .snapshots()
+        .listen((snapshot) {
+      hasSubmittedDemo.value = snapshot.docs.isNotEmpty;
+    });
   }
 
   Future<void> _fetchUserModel(String uid) async {
