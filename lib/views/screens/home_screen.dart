@@ -14,7 +14,6 @@ import 'webview_screen.dart';
 import 'dashboard_screen.dart';
 import 'auth/login_screen.dart';
 import 'package:ao_scan_app/controllers/auth_controller.dart';
-import 'package:ao_scan_app/views/screens/resources/resources_list_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   HomeScreen({super.key});
@@ -381,6 +380,15 @@ class HomeScreen extends StatelessWidget {
               fontSize: 12,
               color: AppColors.textSecondary,
               height: 1.5,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Copyright © 2026 AO Scan Global. All rights reserved.',
+            style: AppTextStyle.regular(
+              fontSize: 11,
+              color: AppColors.textLight,
             ),
             textAlign: TextAlign.center,
           ),

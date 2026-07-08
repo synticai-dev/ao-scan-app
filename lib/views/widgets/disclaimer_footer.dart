@@ -20,6 +20,16 @@ class DisclaimerFooter extends StatelessWidget {
             ),
             textAlign: TextAlign.center,
           ),
+          const SizedBox(height: 12),
+          Text(
+            'Copyright © 2026 AO Scan Global. All rights reserved.',
+            style: AppTextStyle.regular(
+              fontSize: 11,
+              fontWeight: FontWeight.w400,
+              color: Color(0xffA7A7A7),
+            ),
+            textAlign: TextAlign.center,
+          ),
         ],
       ),
     );

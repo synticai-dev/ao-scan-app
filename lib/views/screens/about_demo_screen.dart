@@ -344,6 +344,16 @@ class _ContactSection extends StatelessWidget {
               }
             },
           ),
+          const SizedBox(height: 16),
+          Center(
+            child: Text(
+              'Copyright © 2026 AO Scan Global. All rights reserved.',
+              style: AppTextStyle.regular(
+                fontSize: 11,
+                color: AppColors.textLight,
+              ),
+            ),
+          ),
         ],
       ),
     );

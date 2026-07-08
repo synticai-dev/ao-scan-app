@@ -838,8 +838,9 @@ class DashboardScreen extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Text(
-          'AO Scan Global • v1.0.0',
+          'Copyright © 2026 AO Scan Global. All rights reserved.\nAO Scan Global • v1.0.0',
           style: AppTextStyle.regular(fontSize: 11, color: AppColors.textLight),
+          textAlign: TextAlign.center,
         ),
       ],
     );
