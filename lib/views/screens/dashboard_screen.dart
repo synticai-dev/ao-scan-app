@@ -12,6 +12,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'records/ao_scan_records_main_screen.dart';
+import '../../controllers/records_controller.dart';
 
 class DashboardScreen extends StatelessWidget {
   DashboardScreen({super.key});
@@ -57,12 +59,16 @@ class DashboardScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _profileCard(user),
+                    const SizedBox(height: 20),
+                    _recordsCard(context),
                     const SizedBox(height: 24),
                     _requestsSection(),
                     const SizedBox(height: 24),
-                    Obx(() => authController.hasSubmittedDemo.value
-                        ? const SizedBox.shrink()
-                        : _bookDemoBanner()),
+                    Obx(
+                      () => authController.hasSubmittedDemo.value
+                          ? const SizedBox.shrink()
+                          : _bookDemoBanner(),
+                    ),
                     const SizedBox(height: 24),
                     _footer(context),
                     const SizedBox(height: 40),
@@ -266,15 +272,20 @@ class DashboardScreen extends StatelessWidget {
                             vertical: 12,
                           ),
                           decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                Colors.white.withOpacity(0.15),
-                                Colors.white.withOpacity(0.05),
-                              ],
-                            ),
+                            color: hasDemo ? Colors.white : null,
+                            gradient: hasDemo
+                                ? null
+                                : LinearGradient(
+                                    colors: [
+                                      Colors.white.withOpacity(0.15),
+                                      Colors.white.withOpacity(0.05),
+                                    ],
+                                  ),
                             borderRadius: BorderRadius.circular(32),
                             border: Border.all(
-                              color: Colors.white.withOpacity(0.2),
+                              color: hasDemo
+                                  ? Colors.white
+                                  : Colors.white.withOpacity(0.2),
                               width: 1,
                             ),
                             boxShadow: [
@@ -292,7 +303,9 @@ class DashboardScreen extends StatelessWidget {
                                 hasDemo
                                     ? Icons.info_outline_rounded
                                     : Icons.add_circle_outline_rounded,
-                                color: Colors.white,
+                                color: hasDemo
+                                    ? AppColors.darkBlue
+                                    : Colors.white,
                                 size: 18,
                               ),
                               const SizedBox(width: 10),
@@ -302,13 +315,17 @@ class DashboardScreen extends StatelessWidget {
                                     : 'REQUEST FREE DEMO',
                                 style: AppTextStyle.bold(
                                   fontSize: 13,
-                                  color: Colors.white,
+                                  color: hasDemo
+                                      ? AppColors.darkBlue
+                                      : Colors.white,
                                 ).copyWith(letterSpacing: 0.5),
                               ),
                               const SizedBox(width: 6),
                               Icon(
                                 Icons.arrow_forward_ios_rounded,
-                                color: Colors.white.withOpacity(0.5),
+                                color: hasDemo
+                                    ? AppColors.darkBlue.withOpacity(0.6)
+                                    : Colors.white.withOpacity(0.5),
                                 size: 12,
                               ),
                             ],
@@ -353,6 +370,114 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
+  Widget _recordsCard(BuildContext context) {
+    final recordsController = Get.put(RecordsController());
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF1E2F66).withOpacity(0.06),
+            blurRadius: 20,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF3A53A3).withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(
+                      Icons.folder_shared_rounded,
+                      color: Color(0xFF3A53A3),
+                      size: 22,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'AO Scan Records',
+                        style: AppTextStyle.bold(
+                          fontSize: 16,
+                          color: const Color(0xFF1E2F66),
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      const Text(
+                        'Anonymous Session Tracker',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFF64748B),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              Obx(
+                () => Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF3A53A3).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    '${recordsController.totalSessionsCount} Sessions',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF3A53A3),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton.icon(
+            onPressed: () {
+              Get.to(() => const AoScanRecordsMainScreen());
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF3A53A3),
+              minimumSize: const Size(double.infinity, 46),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            icon: const Icon(Icons.open_in_new, size: 18, color: Colors.white),
+            label: const Text(
+              'Open AO Scan Records',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   // ── STATS ROW ───────────────────────────────────────────────
   Widget _statsRow(String uid) {
     return StreamBuilder<QuerySnapshot>(
@@ -386,7 +511,11 @@ class DashboardScreen extends StatelessWidget {
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: _statChip('$pending', 'Pending', const Color(0xFFD97706)),
+              child: _statChip(
+                '$pending',
+                'Submitted',
+                const Color(0xFFD97706),
+              ),
             ),
           ],
         );
@@ -449,7 +578,7 @@ class DashboardScreen extends StatelessWidget {
   Widget _profileCard(dynamic user) {
     if (user == null) return const SizedBox.shrink();
     final fields = <_Field>[];
-    if ((user.occupation ?? '').isNotEmpty)
+    if ((user.occupation ?? '').isNotEmpty) {
       fields.add(
         _Field(
           Icons.work_rounded,
@@ -459,7 +588,8 @@ class DashboardScreen extends StatelessWidget {
           const Color(0xFFEEF2FF),
         ),
       );
-    if ((user.country ?? '').isNotEmpty)
+    }
+    if ((user.country ?? '').isNotEmpty) {
       fields.add(
         _Field(
           Icons.language_rounded,
@@ -469,7 +599,8 @@ class DashboardScreen extends StatelessWidget {
           const Color(0xFFEFF6FF),
         ),
       );
-    if ((user.phoneNumber ?? '').isNotEmpty)
+    }
+    if ((user.phoneNumber ?? '').isNotEmpty) {
       fields.add(
         _Field(
           Icons.phone_rounded,
@@ -479,7 +610,8 @@ class DashboardScreen extends StatelessWidget {
           const Color(0xFFECFDF5),
         ),
       );
-    if ((user.sex ?? '').isNotEmpty)
+    }
+    if ((user.sex ?? '').isNotEmpty) {
       fields.add(
         _Field(
           Icons.person_rounded,
@@ -489,7 +621,8 @@ class DashboardScreen extends StatelessWidget {
           const Color(0xFFF5F3FF),
         ),
       );
-    if ((user.dob ?? '').isNotEmpty)
+    }
+    if ((user.dob ?? '').isNotEmpty) {
       fields.add(
         _Field(
           Icons.calendar_month_rounded,
@@ -499,6 +632,7 @@ class DashboardScreen extends StatelessWidget {
           const Color(0xFFFFF1F2),
         ),
       );
+    }
     if (fields.isEmpty) return const SizedBox.shrink();
 
     return Container(
@@ -678,7 +812,7 @@ class DashboardScreen extends StatelessWidget {
         break;
       default:
         statusColor = const Color(0xFFD97706);
-        statusLabel = 'Pending';
+        statusLabel = 'Submitted';
     }
     return GestureDetector(
       onTap: () => Get.to(() => DemoRequestDetailsScreen(request: request)),

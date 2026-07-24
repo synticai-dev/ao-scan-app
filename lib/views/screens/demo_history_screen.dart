@@ -117,7 +117,9 @@ class DemoHistoryScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
-                request.status.toUpperCase(),
+                request.status.toLowerCase() == 'pending'
+                    ? 'SUBMITTED'
+                    : request.status.toUpperCase(),
                 style: AppTextStyle.bold(fontSize: 10, color: statusColor),
               ),
             ),

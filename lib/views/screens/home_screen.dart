@@ -9,10 +9,10 @@ import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'demo_form_screen.dart';
 import 'about_demo_screen.dart';
-import 'chat_screen.dart';
 import 'webview_screen.dart';
 import 'dashboard_screen.dart';
 import 'auth/login_screen.dart';
+import 'records/ao_scan_records_main_screen.dart';
 import 'package:ao_scan_app/controllers/auth_controller.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -32,188 +32,209 @@ class HomeScreen extends StatelessWidget {
           style: AppTextStyle.bold(fontSize: 18, color: AppColors.textPrimary),
         ),
         actions: [
-          IconButton(
-            onPressed: () => _showLogoutDialog(context),
-            icon: const Icon(Icons.logout, color: AppColors.textPrimary),
+          Padding(
+            padding: const EdgeInsets.only(right: 16.0, top: 8.0, bottom: 8.0),
+            child: Container(
+              width: 40,
+              height: 40,
+              decoration: const BoxDecoration(
+                color: AppColors.backgroundLight,
+                shape: BoxShape.circle,
+              ),
+              child: IconButton(
+                padding: EdgeInsets.zero,
+                onPressed: () => _showLogoutDialog(context),
+                icon: const Icon(
+                  Icons.logout,
+                  color: AppColors.textPrimary,
+                  size: 20,
+                ),
+              ),
+            ),
           ),
         ],
         elevation: 0,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          child: Container(
-            height: size.height,
-            width: size.width,
-            constraints: BoxConstraints(minHeight: size.height),
-            color: AppColors.backgroundWhite,
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: size.width * 0.06,
-                vertical: size.height * 0.03,
-              ),
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    SizedBox(height: size.height * 0.04),
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: size.width * 0.06,
+              vertical: size.height * 0.015,
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SizedBox(height: size.height * 0.01),
 
-                    // Logo
-                    Image.asset(
-                      'assets/images/logo.png',
-                      height: size.height * 0.25,
-                      width: size.width * 0.6,
-                      fit: BoxFit.contain,
-                    ),
-                    SizedBox(height: size.height * 0.05),
-
-                    // Free Demo / About Your AO Scan Demo button
-                    Obx(() {
-                      final hasDemo = authController.hasSubmittedDemo.value;
-                      return _buildOutlinedButton(
-                        context: context,
-                        text: hasDemo
-                            ? 'About Your AO Scan Demo'
-                            : 'Free AO Scan Demo',
-                        onPressed: () {
-                          if (hasDemo) {
-                            Get.to(() => const AboutDemoMenuScreen());
-                          } else {
-                            controller.resetForm();
-                            Get.to(() => const DemoFormScreen());
-                          }
-                        },
-                        size: size,
-                      );
-                    }),
-
-                    SizedBox(height: size.height * 0.02),
-
-                    _buildOutlinedButton(
-                      context: context,
-                      text: 'My Dashboard',
-                      onPressed: () {
-                        if (authController.isLoggedIn) {
-                          Get.to(() => DashboardScreen());
-                        } else {
-                          Get.to(() => LoginScreen());
-                        }
-                      },
-                      size: size,
-                    ),
-
-                    SizedBox(height: size.height * 0.02),
-
-                    _buildOutlinedButton(
-                      context: context,
-                      text: 'Explore AO Scan',
-                      onPressed: () async {
-                        final uri = Uri.parse(
-                          "https://shop.solexnation.com/energy1/home",
-                        );
-                        if (!await launchUrl(
-                          uri,
-                          mode: LaunchMode.externalApplication,
-                        )) {
-                          throw 'Could not launch "https://shop.solexnation.com/energy1/home';
-                        }
-                        // Get.to(
-                        //   () => const WebViewScreen(
-                        //     url: 'https://shop.solexnation.com/energy1/home',
-                        //     title: 'Shop AO Scan & Products',
-                        //   ),
-                        // );
-                      },
-                      size: size,
-                    ),
-                    SizedBox(height: size.height * 0.015),
-                    _buildOutlinedButton(
-                      context: context,
-                      text: 'About AO Scan',
-                      onPressed: () {
-                        Get.to(() => AboutScreen());
-                      },
-                      size: size,
-                    ),
-                    SizedBox(height: size.height * 0.015),
-                    _buildOutlinedButton(
-                      context: context,
-                      text: 'Resources Hub',
-                      onPressed: () {
-                        Get.to(() => SocialLinksScreen());
-                      },
-                      size: size,
-                    ),
-
-                    SizedBox(height: size.height * 0.015),
-                    _buildGreenButton(
-                      context: context,
-                      text: 'Live Chat',
-                      onPressed: () async {
-                        final uri = Uri.parse(
-                          'https://tawk.to/chat/647b63247957702c744b9614/1h20vmhkl',
-                        );
-                        if (!await launchUrl(
-                          uri,
-                          mode: LaunchMode.externalApplication,
-                        )) {
-                          throw 'Could not launch Tawk chat';
-                        }
-                      },
-                      size: size,
-                    ),
-
-                    SizedBox(height: size.height * 0.015),
-                    _buildOutlinedButton(
-                      context: context,
-                      text: 'Log In (already subscribed)',
-                      onPressed: () async {
-                        final uri = Uri.parse("https://app.aoscan.com/");
-                        if (!await launchUrl(
-                          uri,
-                          mode: LaunchMode.externalApplication,
-                        )) {
-                          throw 'Could not launch "https://app.aoscan.com/';
-                        }
-                      },
-                      size: size,
-                    ),
-                    SizedBox(height: size.height * 0.015),
-                    _buildOutlinedButton(
-                      context: context,
-                      text: 'Back Office',
-                      onPressed: () async {
-                        final uri = Uri.parse(
-                          "https://office2.solexnation.com/",
-                        );
-                        if (!await launchUrl(
-                          uri,
-                          mode: LaunchMode.externalApplication,
-                        )) {
-                          throw 'Could not launch "https://office2.solexnation.com/';
-                        }
-                        // Get.to(
-                        //   () => const WebViewScreen(
-                        //     url: 'https://office2.solexnation.com/',
-                        //     title: 'Back Office',
-                        //   ),
-                        // );
-                      },
-                      size: size,
-                    ),
-                    SizedBox(height: size.height * 0.04),
-                    // Agreement Text
-                    _buildAgreementText(context, size),
-                    SizedBox(height: size.height * 0.03),
-                    // Divider
-                    Divider(color: AppColors.borderLight, thickness: 1),
-                    SizedBox(height: size.height * 0.02),
-                    // Disclaimer
-                    _buildDisclaimerText(context, size),
-                    SizedBox(height: size.height * 0.02),
-                  ],
+                // Logo
+                Image.asset(
+                  'assets/images/logo.png',
+                  height: size.height * 0.2,
+                  width: size.width * 0.45,
+                  fit: BoxFit.contain,
                 ),
-              ),
+                SizedBox(height: size.height * 0.02),
+
+                // Free Demo / About Your AO Scan Demo button
+                Obx(() {
+                  final hasDemo = authController.hasSubmittedDemo.value;
+                  return _buildOutlinedButton(
+                    context: context,
+                    text: hasDemo
+                        ? 'About Your AO Scan Demo'
+                        : 'Free AO Scan Demo',
+                    onPressed: () {
+                      if (hasDemo) {
+                        Get.to(() => const AboutDemoMenuScreen());
+                      } else {
+                        controller.resetForm();
+                        Get.to(() => const DemoFormScreen());
+                      }
+                    },
+                    size: size,
+                  );
+                }),
+
+                SizedBox(height: size.height * 0.01),
+
+                _buildOutlinedButton(
+                  context: context,
+                  text: 'My Dashboard',
+                  onPressed: () {
+                    if (authController.isLoggedIn) {
+                      Get.to(() => DashboardScreen());
+                    } else {
+                      Get.to(() => LoginScreen());
+                    }
+                  },
+                  size: size,
+                ),
+
+                SizedBox(height: size.height * 0.01),
+
+                _buildOutlinedButton(
+                  context: context,
+                  text: 'AO Scan Records',
+                  onPressed: () {
+                    if (authController.isLoggedIn) {
+                      Get.to(() => const AoScanRecordsMainScreen());
+                    } else {
+                      Get.to(() => LoginScreen());
+                    }
+                  },
+                  size: size,
+                ),
+
+                SizedBox(height: size.height * 0.01),
+
+                _buildOutlinedButton(
+                  context: context,
+                  text: 'Explore AO Scan',
+                  onPressed: () async {
+                    final uri = Uri.parse(
+                      "https://shop.solexnation.com/energy1/home",
+                    );
+                    if (!await launchUrl(
+                      uri,
+                      mode: LaunchMode.externalApplication,
+                    )) {
+                      throw 'Could not launch "https://shop.solexnation.com/energy1/home';
+                    }
+                    // Get.to(
+                    //   () => const WebViewScreen(
+                    //     url: 'https://shop.solexnation.com/energy1/home',
+                    //     title: 'Shop AO Scan & Products',
+                    //   ),
+                    // );
+                  },
+                  size: size,
+                ),
+                SizedBox(height: size.height * 0.01),
+                _buildOutlinedButton(
+                  context: context,
+                  text: 'About AO Scan',
+                  onPressed: () {
+                    Get.to(() => AboutScreen());
+                  },
+                  size: size,
+                ),
+                SizedBox(height: size.height * 0.01),
+                _buildOutlinedButton(
+                  context: context,
+                  text: 'Resources Hub',
+                  onPressed: () {
+                    Get.to(() => SocialLinksScreen());
+                  },
+                  size: size,
+                ),
+
+                SizedBox(height: size.height * 0.01),
+                _buildGreenButton(
+                  context: context,
+                  text: 'Live Chat',
+                  onPressed: () async {
+                    final uri = Uri.parse(
+                      'https://tawk.to/chat/647b63247957702c744b9614/1h20vmhkl',
+                    );
+                    if (!await launchUrl(
+                      uri,
+                      mode: LaunchMode.externalApplication,
+                    )) {
+                      throw 'Could not launch Tawk chat';
+                    }
+                  },
+                  size: size,
+                ),
+
+                SizedBox(height: size.height * 0.01),
+                _buildOutlinedButton(
+                  context: context,
+                  text: 'Log In (already subscribed)',
+                  onPressed: () async {
+                    final uri = Uri.parse("https://app.aoscan.com/");
+                    if (!await launchUrl(
+                      uri,
+                      mode: LaunchMode.externalApplication,
+                    )) {
+                      throw 'Could not launch "https://app.aoscan.com/';
+                    }
+                  },
+                  size: size,
+                ),
+                SizedBox(height: size.height * 0.01),
+                _buildOutlinedButton(
+                  context: context,
+                  text: 'Back Office',
+                  onPressed: () async {
+                    final uri = Uri.parse("https://office2.solexnation.com/");
+                    if (!await launchUrl(
+                      uri,
+                      mode: LaunchMode.externalApplication,
+                    )) {
+                      throw 'Could not launch "https://office2.solexnation.com/';
+                    }
+                    // Get.to(
+                    //   () => const WebViewScreen(
+                    //     url: 'https://office2.solexnation.com/',
+                    //     title: 'Back Office',
+                    //   ),
+                    // );
+                  },
+                  size: size,
+                ),
+                SizedBox(height: size.height * 0.02),
+                // Agreement Text
+                _buildAgreementText(context, size),
+                SizedBox(height: size.height * 0.015),
+                // Divider
+                Divider(color: AppColors.borderLight, thickness: 1),
+                SizedBox(height: size.height * 0.015),
+                // Disclaimer
+                _buildDisclaimerText(context, size),
+                SizedBox(height: size.height * 0.02),
+              ],
             ),
           ),
         ),
@@ -248,7 +269,7 @@ class HomeScreen extends StatelessWidget {
   }) {
     return SizedBox(
       width: size.width * 0.88,
-      height: size.height * 0.06,
+      height: size.height * 0.05,
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
@@ -279,7 +300,7 @@ class HomeScreen extends StatelessWidget {
   }) {
     return SizedBox(
       width: size.width * 0.88,
-      height: size.height * 0.06,
+      height: size.height * 0.05,
       child: OutlinedButton(
         onPressed: onPressed,
         style: OutlinedButton.styleFrom(
@@ -310,7 +331,7 @@ class HomeScreen extends StatelessWidget {
   }) {
     return SizedBox(
       width: size.width * 0.88,
-      height: size.height * 0.06,
+      height: size.height * 0.05,
       child: ElevatedButton.icon(
         onPressed: onPressed,
         icon: const Icon(Icons.chat_bubble_rounded, size: 20),

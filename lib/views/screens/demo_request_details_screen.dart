@@ -136,7 +136,7 @@ class DemoRequestDetailsScreen extends StatelessWidget {
       default:
         statusColor = AppColors.warningAmber;
         statusIcon = Icons.auto_mode_rounded;
-        statusTitle = 'Pending Review';
+        statusTitle = 'Submitted';
     }
 
     return Container(
