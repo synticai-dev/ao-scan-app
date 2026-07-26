@@ -23,7 +23,14 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
   String _concernsSearchQuery = '';
   String _patternsSearchQuery = '';
 
+  final ScrollController _concernsScrollController = ScrollController();
   bool _isSubmitting = false;
+
+  @override
+  void dispose() {
+    _concernsScrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -263,9 +270,11 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
             ConstrainedBox(
               constraints: const BoxConstraints(maxHeight: 300),
               child: Scrollbar(
+                controller: _concernsScrollController,
                 thumbVisibility: true,
                 radius: const Radius.circular(6),
                 child: ListView.builder(
+                  controller: _concernsScrollController,
                   shrinkWrap: true,
                   physics: const BouncingScrollPhysics(),
                   padding: const EdgeInsets.only(right: 8),
@@ -469,6 +478,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
     });
 
     if (success) {
+      _recordsController.fetchClientRecords();
       Get.back();
       Get.snackbar(
         'Success',

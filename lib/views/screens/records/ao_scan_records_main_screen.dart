@@ -94,7 +94,7 @@ class AoScanRecordsMainScreen extends StatelessWidget {
                         ),
                         icon: const Icon(
                           Icons.add_circle_outline,
-                          color: Colors.white,
+                          color: Colors.greenAccent,
                         ),
                         label: FittedBox(
                           fit: BoxFit.scaleDown,
@@ -103,7 +103,7 @@ class AoScanRecordsMainScreen extends StatelessWidget {
                               style: TextStyle(fontSize: 15, color: Colors.white),
                               children: [
                                 TextSpan(
-                                  text: '+Create ',
+                                  text: 'Create ',
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     color: Colors.greenAccent,
@@ -139,7 +139,7 @@ class AoScanRecordsMainScreen extends StatelessWidget {
                         ),
                         icon: const Icon(
                           Icons.playlist_add,
-                          color: AppColors.primaryBlue,
+                          color: Colors.pinkAccent,
                         ),
                         label: FittedBox(
                           fit: BoxFit.scaleDown,
@@ -148,7 +148,7 @@ class AoScanRecordsMainScreen extends StatelessWidget {
                               style: TextStyle(fontSize: 15, color: AppColors.primaryBlue),
                               children: [
                                 TextSpan(
-                                  text: '+Add ',
+                                  text: 'Add ',
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     color: Colors.pinkAccent,
@@ -323,39 +323,167 @@ class AoScanRecordsMainScreen extends StatelessWidget {
     textController.clear();
     showDialog(
       context: context,
+      barrierDismissible: true,
       builder: (context) {
-        return AlertDialog(
-          title: const Text('Enter Client Code'),
-          content: TextField(
-            controller: textController,
-            textCapitalization: TextCapitalization.characters,
-            decoration: const InputDecoration(
-              hintText: 'e.g. AO-7K4P9M2Q',
-              border: OutlineInputBorder(),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                final code = textController.text.trim().toUpperCase();
-                if (code.isNotEmpty) {
-                  Navigator.pop(context);
-                  Get.to(() => AddSessionScreen(clientCode: code));
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primaryBlue,
+        return StatefulBuilder(
+          builder: (context, setState) {
+            final codeText = textController.text.trim();
+            final isValid = codeText.isNotEmpty;
+
+            return Dialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
               ),
-              child: const Text(
-                'Continue',
-                style: TextStyle(color: Colors.white),
+              elevation: 8,
+              backgroundColor: Colors.white,
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Top Icon Indicator
+                    Center(
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryBlue.withOpacity(0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.qr_code_scanner_rounded,
+                          size: 36,
+                          color: AppColors.primaryBlue,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    // Title
+                    const Text(
+                      'Enter Client Code',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    // Subtitle
+                    const Text(
+                      'Input the anonymous client reference code to add a session record.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: AppColors.textSecondary,
+                        height: 1.4,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    // TextField
+                    TextField(
+                      controller: textController,
+                      textCapitalization: TextCapitalization.characters,
+                      onChanged: (val) {
+                        setState(() {});
+                      },
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1.2,
+                        color: AppColors.textPrimary,
+                      ),
+                      decoration: InputDecoration(
+                        hintText: 'e.g. AO-7K4P9M2Q',
+                        hintStyle: const TextStyle(
+                          color: AppColors.textLight,
+                          fontWeight: FontWeight.normal,
+                          letterSpacing: 1.0,
+                        ),
+                        prefixIcon: const Icon(
+                          Icons.vpn_key_rounded,
+                          color: AppColors.primaryBlue,
+                        ),
+                        filled: true,
+                        fillColor: AppColors.backgroundLight,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 14,
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(
+                            color: AppColors.borderLight,
+                            width: 1.5,
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(
+                            color: AppColors.primaryBlue,
+                            width: 2.0,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    // Action Buttons
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () => Navigator.pop(context),
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              side: const BorderSide(color: AppColors.borderLight),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            child: const Text(
+                              'Cancel',
+                              style: TextStyle(
+                                color: AppColors.textSecondary,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: isValid
+                                ? () {
+                                    final code = textController.text.trim().toUpperCase();
+                                    Navigator.pop(context);
+                                    Get.to(() => AddSessionScreen(clientCode: code));
+                                  }
+                                : null,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primaryBlue,
+                              disabledBackgroundColor:
+                                  AppColors.primaryBlue.withOpacity(0.5),
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              elevation: 0,
+                            ),
+                            child: const Text(
+                              'Continue',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            );
+          },
         );
       },
     );
