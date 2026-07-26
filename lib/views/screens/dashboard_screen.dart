@@ -303,9 +303,7 @@ class DashboardScreen extends StatelessWidget {
                                 hasDemo
                                     ? Icons.info_outline_rounded
                                     : Icons.add_circle_outline_rounded,
-                                color: hasDemo
-                                    ? AppColors.darkBlue
-                                    : Colors.white,
+                                color: hasDemo ? AppColors.darkBlue : Colors.white,
                                 size: 18,
                               ),
                               const SizedBox(width: 10),
@@ -315,9 +313,7 @@ class DashboardScreen extends StatelessWidget {
                                     : 'REQUEST FREE DEMO',
                                 style: AppTextStyle.bold(
                                   fontSize: 13,
-                                  color: hasDemo
-                                      ? AppColors.darkBlue
-                                      : Colors.white,
+                                  color: hasDemo ? AppColors.darkBlue : Colors.white,
                                 ).copyWith(letterSpacing: 0.5),
                               ),
                               const SizedBox(width: 6),
@@ -511,11 +507,7 @@ class DashboardScreen extends StatelessWidget {
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: _statChip(
-                '$pending',
-                'Submitted',
-                const Color(0xFFD97706),
-              ),
+              child: _statChip('$pending', 'Submitted', const Color(0xFFD97706)),
             ),
           ],
         );
