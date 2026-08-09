@@ -1,4 +1,4 @@
-import 'package:ao_scan_app/views/screens/webview_screen.dart';
+import 'package:ao_scan_app/views/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/demo_form_controller.dart';
@@ -77,17 +77,7 @@ class Step5Confirmation extends StatelessWidget {
                       height: 50,
                       child: ElevatedButton(
                         onPressed: () {
-                          // Handle visit AO Scan Global
-                          Get.snackbar(
-                            'Success',
-                            'Redirecting to AO Scan Global...',
-                          );
-                          Get.to(
-                            () => const WebViewScreen(
-                              url: 'https://www.aoscanglobal.com',
-                              title: 'About AO Scan',
-                            ),
-                          );
+                          Get.offAll(() => HomeScreen());
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.buttonPrimary,
@@ -96,7 +86,7 @@ class Step5Confirmation extends StatelessWidget {
                           ),
                         ),
                         child: Text(
-                          'Visit AO Scan Global',
+                          'Back to Home',
                           style: AppTextStyle.bold(
                             fontSize: 16,
                             color: AppColors.buttonTextWhite,

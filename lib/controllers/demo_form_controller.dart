@@ -240,8 +240,7 @@ class DemoFormController extends GetxController {
   }
 
   bool validateStep2() {
-    return validateOccupation(occupationController.text) == null &&
-        validateUseType(useTypeController.text) == null;
+    return validateOccupation(occupationController.text) == null;
   }
 
   bool validateStep3() {
@@ -369,8 +368,61 @@ class DemoFormController extends GetxController {
   }
 
   Future<void> submitForm() async {
+    if (!validateStep1()) {
+      List<String> missing = [];
+      if (validateFirstName(firstNameController.text) != null) missing.add('First Name');
+      if (validateLastName(lastNameController.text) != null) missing.add('Last Name');
+      if (validateEmail(emailController.text) != null) missing.add('Email');
+      if (validateCountry(countryController.text) != null) missing.add('Country');
+      if (validatePhone(phoneController.text) != null) missing.add('Phone Number');
+      if (validateSex(sexController.text) != null) missing.add('Sex');
+      if (validateWeight(weightController.text) != null) missing.add('Weight');
+      if (validateHeight(heightController.text) != null) missing.add('Height');
+      if (validateDOB(dobController.text) != null) missing.add('Date of Birth');
+      
+      Get.snackbar(
+        'Validation Error',
+        'Step 1 is incomplete. Please check: ${missing.join(', ')}.',
+        duration: const Duration(seconds: 4),
+      );
+      currentStep.value = 1;
+      return;
+    }
+
+    if (!validateStep2()) {
+      List<String> missing = [];
+      if (validateOccupation(occupationController.text) != null) missing.add('Occupation');
+
+      Get.snackbar(
+        'Validation Error',
+        'Step 2 is incomplete. Please check: ${missing.join(', ')}.',
+        duration: const Duration(seconds: 4),
+      );
+      currentStep.value = 2;
+      return;
+    }
+
+    if (!validateStep3()) {
+      List<String> missing = [];
+      if (selectedPhoto.value == null) missing.add('Photo');
+      if (audioFilePath.value.isEmpty) missing.add('Voice Recording');
+
+      Get.snackbar(
+        'Validation Error',
+        'Step 3 is incomplete. Please provide: ${missing.join(', ')}.',
+        duration: const Duration(seconds: 4),
+      );
+      currentStep.value = 3;
+      return;
+    }
+
     if (!validateStep4()) {
-      Get.snackbar('Validation Error', 'Please accept all consent checkboxes');
+      Get.snackbar(
+        'Validation Error',
+        'Step 4 is incomplete. Please accept all consent checkboxes.',
+        duration: const Duration(seconds: 4),
+      );
+      currentStep.value = 4;
       return;
     }
 

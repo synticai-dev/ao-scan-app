@@ -300,7 +300,6 @@ class Step1ContactInfo extends StatelessWidget {
                   dropdownValue = valueController.text;
                 } else {
                   dropdownValue = null;
-                  valueController.clear(); // 💥 Important Fix
                 }
 
                 return DropdownButtonFormField<String>(
