@@ -1,6 +1,8 @@
 import 'package:ao_scan_app/controllers/demo_form_controller.dart';
 import 'package:ao_scan_app/utils/app_colors.dart';
 import 'package:ao_scan_app/utils/app_textstyle.dart';
+import 'package:ao_scan_app/utils/approved_countries.dart';
+import 'package:ao_scan_app/views/screens/country_not_available_screen.dart';
 import 'package:ao_scan_app/views/screens/about_screen.dart';
 import 'package:ao_scan_app/views/screens/contact_page.dart';
 import 'package:flutter/material.dart';
@@ -88,9 +90,19 @@ class HomeScreen extends StatelessWidget {
                     onPressed: () {
                       if (hasDemo) {
                         Get.to(() => const AboutDemoMenuScreen());
+                      } else if (!authController.isLoggedIn) {
+                        // Login is required to book a demo (same pattern as
+                        // the other protected buttons on this screen).
+                        Get.to(() => LoginScreen());
                       } else {
                         controller.resetForm();
-                        Get.to(() => const DemoFormScreen());
+                        final country =
+                            authController.userModel.value?.country;
+                        if (isCountryApproved(country)) {
+                          Get.to(() => const DemoFormScreen());
+                        } else {
+                          Get.to(() => const CountryNotAvailableScreen());
+                        }
                       }
                     },
                     size: size,

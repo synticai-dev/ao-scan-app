@@ -1,29 +1,38 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:flutter/foundation.dart';
 
 class AnalyticsService {
   static final FirebaseAnalytics _analytics = FirebaseAnalytics.instance;
 
   // Log App Open
   static Future<void> logAppOpen() async {
-    print("ANALYTICS: Logging App Open");
+    if (kDebugMode) {
+      print("ANALYTICS: Logging App Open");
+    }
     await _analytics.logAppOpen();
   }
 
   // Log Login
   static Future<void> logLogin(String loginMethod) async {
-    print("ANALYTICS: Logging Login - Method: $loginMethod");
+    if (kDebugMode) {
+      print("ANALYTICS: Logging Login - Method: $loginMethod");
+    }
     await _analytics.logLogin(loginMethod: loginMethod);
   }
 
   // Log Registration
   static Future<void> logSignUp(String signUpMethod) async {
-    print("ANALYTICS: Logging Sign Up - Method: $signUpMethod");
+    if (kDebugMode) {
+      print("ANALYTICS: Logging Sign Up - Method: $signUpMethod");
+    }
     await _analytics.logSignUp(signUpMethod: signUpMethod);
   }
 
   // Log Free Demo Form Submission
   static Future<void> logFreeDemoSubmission() async {
-    print("ANALYTICS: Logging Free Demo Submission");
+    if (kDebugMode) {
+      print("ANALYTICS: Logging Free Demo Submission");
+    }
     await _analytics.logEvent(
       name: 'free_demo_submit',
       parameters: {

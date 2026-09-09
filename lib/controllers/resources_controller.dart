@@ -2,6 +2,7 @@ import 'package:ao_scan_app/models/resource_model.dart';
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ao_scan_app/controllers/auth_controller.dart';
+import 'package:flutter/foundation.dart';
 
 class ResourcesController extends GetxController {
   final authController = Get.find<AuthController>();
@@ -71,7 +72,9 @@ class ResourcesController extends GetxController {
       final doc = await _firestore.collection('users').doc(authController.firebaseUser.value!.uid).collection('favorites').get();
       favoriteIds.assignAll(doc.docs.map((d) => d.id).toList());
     } catch (e) {
-      print('Error loading favorites: $e');
+      if (kDebugMode) {
+        print('Error loading favorites: $e');
+      }
     }
   }
 

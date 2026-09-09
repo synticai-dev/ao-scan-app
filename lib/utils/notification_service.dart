@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
+import 'package:flutter/foundation.dart';
 
 class NotificationService extends GetxService {
   final FirebaseMessaging _fcm = FirebaseMessaging.instance;
@@ -17,7 +18,9 @@ class NotificationService extends GetxService {
       provisional: false,
     );
 
-    print('User granted permission: ${settings.authorizationStatus}');
+    if (kDebugMode) {
+      print('User granted permission: ${settings.authorizationStatus}');
+    }
 
     // Create Android Notification Channel
     const AndroidNotificationChannel channel = AndroidNotificationChannel(
@@ -40,8 +43,9 @@ class NotificationService extends GetxService {
     await _localNotifications.initialize(
       initSettings,
       onDidReceiveNotificationResponse: (NotificationResponse details) {
-        // Handle notification tap
-        print('Notification tapped: ${details.payload}');
+        if (kDebugMode) {
+          print('Notification tapped: ${details.payload}');
+        }
       },
     );
 
@@ -61,12 +65,16 @@ class NotificationService extends GetxService {
 
     // Handle messages
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      print('Got a message whilst in the foreground!');
+      if (kDebugMode) {
+        print('Got a message whilst in the foreground!');
+      }
       _showLocalNotification(message);
     });
 
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      print('A new onMessageOpenedApp event was published!');
+      if (kDebugMode) {
+        print('A new onMessageOpenedApp event was published!');
+      }
       // Handle navigation here if needed
     });
 
@@ -112,5 +120,7 @@ class NotificationService extends GetxService {
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
-  print("Handling a background message: ${message.messageId}");
+  if (kDebugMode) {
+    print("Handling a background message: ${message.messageId}");
+  }
 }

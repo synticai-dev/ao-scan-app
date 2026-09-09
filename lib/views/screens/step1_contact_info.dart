@@ -1,4 +1,4 @@
-import 'package:country_picker/country_picker.dart';
+import 'package:ao_scan_app/utils/approved_countries.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -72,27 +72,9 @@ class Step1ContactInfo extends StatelessWidget {
                       ),
                       const SizedBox(height: 16),
 
-                      _buildTextField(
-                        readOnly: true,
-                        validator: controller.validateCountry,
-                        suffixIcon: controller.authController.userModel.value != null
-                            ? null
-                            : const Icon(Icons.arrow_drop_down),
-                        onTap: controller.authController.userModel.value != null
-                            ? null
-                            : () {
-                                showCountryPicker(
-                                  context: context,
-                                  showPhoneCode: false,
-                                  onSelect: (Country country) {
-                                    controller.countryController.text = country.name;
-                                    controller.phoneCountryCode.value =
-                                        '+${country.phoneCode}';
-                                  },
-                                );
-                              },
+                      _buildCountryDropdown(
                         controller: controller.countryController,
-                        label: 'Country *',
+                        validator: controller.validateCountry,
                       ),
                       const SizedBox(height: 16),
                       PhoneNumberField(
@@ -127,11 +109,13 @@ class Step1ContactInfo extends StatelessWidget {
                       _buildTextField(
                         controller: controller.dobController,
                         label: 'Date of Birth *',
-                        suffixIcon: controller.authController.userModel.value != null
+                        // Calendar only when the profile DOB is missing,
+                        // invalid or under-18; otherwise locked (display only).
+                        suffixIcon: controller.isProfileDobValid
                             ? null
                             : const Icon(Icons.calendar_today),
                         readOnly: true,
-                        onTap: controller.authController.userModel.value != null
+                        onTap: controller.isProfileDobValid
                             ? null
                             : () => _selectDate(context),
                         validator: controller.validateDOB,
@@ -450,6 +434,12 @@ class Step1ContactInfo extends StatelessWidget {
       items: _getCountryItems(),
       onChanged: (String? value) {
         controller.text = value ?? '';
+        if (value != null) {
+          final dialCode = approvedCountryDialCode(value);
+          if (dialCode != null) {
+            this.controller.phoneCountryCode.value = dialCode;
+          }
+        }
       },
       validator: validator,
       autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -461,136 +451,7 @@ class Step1ContactInfo extends StatelessWidget {
   }
 
   List<DropdownMenuItem<String>> _getCountryItems() {
-    final countries = [
-      'United States',
-      'United Kingdom',
-      'Canada',
-      'Australia',
-      'Germany',
-      'France',
-      'Italy',
-      'Spain',
-      'Netherlands',
-      'Belgium',
-      'Switzerland',
-      'Austria',
-      'Sweden',
-      'Norway',
-      'Denmark',
-      'Finland',
-      'Poland',
-      'Portugal',
-      'Greece',
-      'Ireland',
-      'Czech Republic',
-      'Hungary',
-      'Romania',
-      'Bulgaria',
-      'Croatia',
-      'Slovakia',
-      'Slovenia',
-      'Estonia',
-      'Latvia',
-      'Lithuania',
-      'Luxembourg',
-      'Malta',
-      'Cyprus',
-      'Iceland',
-      'Liechtenstein',
-      'Monaco',
-      'San Marino',
-      'Vatican City',
-      'Andorra',
-      'Japan',
-      'China',
-      'India',
-      'South Korea',
-      'Singapore',
-      'Malaysia',
-      'Thailand',
-      'Indonesia',
-      'Philippines',
-      'Vietnam',
-      'Taiwan',
-      'Hong Kong',
-      'New Zealand',
-      'South Africa',
-      'Egypt',
-      'Nigeria',
-      'Kenya',
-      'Morocco',
-      'Tunisia',
-      'Algeria',
-      'Ghana',
-      'Ethiopia',
-      'Tanzania',
-      'Uganda',
-      'Zimbabwe',
-      'Botswana',
-      'Namibia',
-      'Mozambique',
-      'Angola',
-      'Zambia',
-      'Malawi',
-      'Madagascar',
-      'Mauritius',
-      'Seychelles',
-      'Brazil',
-      'Mexico',
-      'Argentina',
-      'Chile',
-      'Colombia',
-      'Peru',
-      'Venezuela',
-      'Ecuador',
-      'Guatemala',
-      'Cuba',
-      'Haiti',
-      'Dominican Republic',
-      'Jamaica',
-      'Trinidad and Tobago',
-      'Bahamas',
-      'Barbados',
-      'Belize',
-      'Costa Rica',
-      'Panama',
-      'Honduras',
-      'Nicaragua',
-      'El Salvador',
-      'Paraguay',
-      'Uruguay',
-      'Bolivia',
-      'Guyana',
-      'Suriname',
-      'Russia',
-      'Ukraine',
-      'Turkey',
-      'Saudi Arabia',
-      'United Arab Emirates',
-      'Israel',
-      'Jordan',
-      'Lebanon',
-      'Syria',
-      'Iraq',
-      'Iran',
-      'Kuwait',
-      'Qatar',
-      'Bahrain',
-      'Oman',
-      'Yemen',
-      'Afghanistan',
-      'Pakistan',
-      'Bangladesh',
-      'Sri Lanka',
-      'Nepal',
-      'Bhutan',
-      'Myanmar',
-      'Cambodia',
-      'Laos',
-      'Mongolia',
-      'North Korea',
-      'Other',
-    ];
+    final countries = approvedCountryNames();
 
     return countries.map((String country) {
       return DropdownMenuItem<String>(

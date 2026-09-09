@@ -10,6 +10,9 @@ class UserModel {
   final String? country;
   final String? phoneNumber;
   final String? sex;
+  final String? originPlatform;
+  final Map<String, dynamic>? lastActivePlatforms;
+  final bool? phoneVerified;
   final DateTime? createdAt;
 
   UserModel({
@@ -22,6 +25,9 @@ class UserModel {
     this.country,
     this.phoneNumber,
     this.sex,
+    this.originPlatform,
+    this.lastActivePlatforms,
+    this.phoneVerified,
     this.createdAt,
   });
 
@@ -39,6 +45,9 @@ class UserModel {
       'country': country,
       'phoneNumber': phoneNumber,
       'sex': sex,
+      'originPlatform': originPlatform,
+      'lastActivePlatforms': lastActivePlatforms,
+      'phoneVerified': phoneVerified ?? false,
       'createdAt': createdAt ?? FieldValue.serverTimestamp(),
     };
   }
@@ -54,6 +63,9 @@ class UserModel {
       country: map['country'],
       phoneNumber: map['phoneNumber'],
       sex: map['sex'],
+      originPlatform: map['originPlatform'],
+      lastActivePlatforms: map['lastActivePlatforms'] != null ? Map<String, dynamic>.from(map['lastActivePlatforms']) : null,
+      phoneVerified: map['phoneVerified'] ?? false,
       createdAt: (map['createdAt'] as Timestamp?)?.toDate(),
     );
   }

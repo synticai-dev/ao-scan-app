@@ -2,6 +2,8 @@ import 'package:ao_scan_app/controllers/auth_controller.dart';
 import 'package:ao_scan_app/models/demo_request_model.dart';
 import 'package:ao_scan_app/utils/app_colors.dart';
 import 'package:ao_scan_app/utils/app_textstyle.dart';
+import 'package:ao_scan_app/utils/approved_countries.dart';
+import 'package:ao_scan_app/views/screens/country_not_available_screen.dart';
 import 'package:ao_scan_app/views/screens/auth/login_screen.dart';
 import 'package:ao_scan_app/views/screens/demo_form_screen.dart';
 import 'package:ao_scan_app/views/screens/about_demo_screen.dart';
@@ -24,6 +26,17 @@ class DashboardScreen extends StatelessWidget {
     if (h < 12) return 'Good Morning';
     if (h < 17) return 'Good Afternoon';
     return 'Good Evening';
+  }
+
+  /// Opens the free demo form only for users from approved countries.
+  /// Non-approved users see the country-not-available screen instead.
+  void _openDemoForm() {
+    final country = authController.userModel.value?.country;
+    if (isCountryApproved(country)) {
+      Get.to(() => const DemoFormScreen());
+    } else {
+      Get.to(() => const CountryNotAvailableScreen());
+    }
   }
 
   @override
@@ -263,7 +276,7 @@ class DashboardScreen extends StatelessWidget {
                           if (hasDemo) {
                             Get.to(() => const AboutDemoMenuScreen());
                           } else {
-                            Get.to(() => const DemoFormScreen());
+                            _openDemoForm();
                           }
                         },
                         child: Container(
@@ -907,7 +920,7 @@ class DashboardScreen extends StatelessWidget {
           ),
           const SizedBox(width: 12),
           ElevatedButton(
-            onPressed: () => Get.to(() => const DemoFormScreen()),
+            onPressed: () => _openDemoForm(),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.white,
               foregroundColor: const Color(0xFF1E2F66),

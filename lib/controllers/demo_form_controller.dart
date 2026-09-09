@@ -1,4 +1,6 @@
 import 'package:ao_scan_app/utils/analytics_service.dart';
+import 'package:ao_scan_app/utils/app_colors.dart';
+import 'package:ao_scan_app/utils/approved_countries.dart';
 import 'dart:io';
 import 'package:ao_scan_app/views/screens/step5_confirmation.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +19,7 @@ import 'package:ao_scan_app/controllers/auth_controller.dart';
 
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/foundation.dart';
 
 class DemoFormController extends GetxController {
   final authController = Get.find<AuthController>();
@@ -35,9 +38,19 @@ class DemoFormController extends GetxController {
       firstNameController.text = user.firstName ?? '';
       lastNameController.text = user.lastName ?? '';
       emailController.text = user.email;
-      dobController.text = user.dob ?? '';
+      // Only prefill DOB when it is a valid 18+ date; otherwise leave it
+      // empty so the user must pick one from the calendar picker.
+      // The value is normalized to d/M/yyyy (no leading zeros), the format
+      // required by the email API backend.
+      final profileDob = user.dob?.trim() ?? '';
+      dobController.text =
+          validateDOB(profileDob) == null ? formatDobForSubmit(profileDob) : '';
       occupationController.text = user.occupation ?? '';
-      countryController.text = user.country ?? '';
+      // Only prefill a country that is in the approved list — the demo-form
+      // dropdown only lists the 12 approved countries, so any other value
+      // would leave the dropdown in an invalid state.
+      countryController.text =
+          isCountryApproved(user.country) ? (user.country ?? '') : '';
       sexController.text = user.sex ?? '';
 
       // Handle phone number splitting
@@ -57,6 +70,14 @@ class DemoFormController extends GetxController {
     } else if (authController.firebaseUser.value?.email != null) {
       emailController.text = authController.firebaseUser.value!.email!;
     }
+  }
+
+  /// True when the profile already has a valid 18+ date of birth.
+  /// The Step 1 DOB field is then locked (display only) - it can only be
+  /// edited when the profile DOB is missing, invalid or under-18.
+  bool get isProfileDobValid {
+    final dob = authController.userModel.value?.dob?.trim() ?? '';
+    return validateDOB(dob) == null;
   }
 
   // Step 1: Contact Information
@@ -146,6 +167,9 @@ class DemoFormController extends GetxController {
     if (value == null || value.isEmpty) {
       return 'Country is required';
     }
+    if (!isCountryApproved(value)) {
+      return 'AO Scan is not yet available in your country';
+    }
     return null;
   }
 
@@ -187,30 +211,96 @@ class DemoFormController extends GetxController {
   }
 
   String? validateDOB(String? value) {
-    if (value == null || value.isEmpty) {
+    if (value == null || value.trim().isEmpty) {
       return 'Date of birth is required';
     }
-    try {
-      final parts = value.split('/');
-      if (parts.length == 3) {
-        final day = int.parse(parts[0]);
-        final month = int.parse(parts[1]);
-        final year = int.parse(parts[2]);
-        final birthDate = DateTime(year, month, day);
-        final today = DateTime.now();
-        int age = today.year - birthDate.year;
-        if (today.month < birthDate.month ||
-            (today.month == birthDate.month && today.day < birthDate.day)) {
-          age--;
-        }
-        if (age < 18) {
-          return 'You must be at least 18 years old';
-        }
-      }
-    } catch (e) {
+    // Must be exactly dd/MM/yyyy - the field is filled by the calendar picker
+    final parts = value.trim().split('/');
+    if (parts.length != 3) {
       return 'Invalid date format';
     }
+    final day = int.tryParse(parts[0]);
+    final month = int.tryParse(parts[1]);
+    final year = int.tryParse(parts[2]);
+    if (day == null || month == null || year == null) {
+      return 'Invalid date format';
+    }
+    if (year < 1900 || month < 1 || month > 12 || day < 1 || day > 31) {
+      return 'Invalid date format';
+    }
+    final birthDate = DateTime(year, month, day);
+    // Reject impossible dates such as 31/02/2000
+    if (birthDate.day != day ||
+        birthDate.month != month ||
+        birthDate.year != year) {
+      return 'Invalid date format';
+    }
+    final today = DateTime.now();
+    if (birthDate.isAfter(today)) {
+      return 'Date of birth cannot be in the future';
+    }
+    int age = today.year - birthDate.year;
+    if (today.month < birthDate.month ||
+        (today.month == birthDate.month && today.day < birthDate.day)) {
+      age--;
+    }
+    if (age < 18) {
+      return 'You must be at least 18 years old';
+    }
     return null;
+  }
+
+  /// Formats a date string into the canonical d/M/yyyy form (no leading
+  /// zeros, e.g. 22/8/2008). Used for the form display and the Firestore
+  /// record. Note: the email API uses [formatDobForApi] (ISO yyyy-MM-dd)
+  /// because this backend parses dates US-style. Accepts both padded
+  /// (04/10/2001) and unpadded (4/10/2001) inputs. Returns an empty string
+  /// if the input is not a valid calendar date.
+  String formatDobForSubmit(String value) {
+    final parts = value.trim().split('/');
+    if (parts.length != 3) return '';
+    final day = int.tryParse(parts[0]);
+    final month = int.tryParse(parts[1]);
+    final year = int.tryParse(parts[2]);
+    if (day == null || month == null || year == null) return '';
+    if (year < 1900 || month < 1 || month > 12 || day < 1 || day > 31) {
+      return '';
+    }
+    final birthDate = DateTime(year, month, day);
+    // Reject impossible dates such as 31/02/2000
+    if (birthDate.day != day ||
+        birthDate.month != month ||
+        birthDate.year != year) {
+      return '';
+    }
+    return '$day/$month/$year';
+  }
+
+  /// Formats a date string into the ISO yyyy-MM-dd form (e.g. 2008-08-22)
+  /// required by the email API backend. The backend parses dates US-style,
+  /// so the dd/MM/yyyy app format only works when the day is 12 or less;
+  /// ISO is unambiguous and always accepted. Returns an empty string if the
+  /// input is not a valid calendar date.
+  String formatDobForApi(String value) {
+    final parts = value.trim().split('/');
+    if (parts.length != 3) return '';
+    final day = int.tryParse(parts[0]);
+    final month = int.tryParse(parts[1]);
+    final year = int.tryParse(parts[2]);
+    if (day == null || month == null || year == null) return '';
+    if (year < 1900 || month < 1 || month > 12 || day < 1 || day > 31) {
+      return '';
+    }
+    final birthDate = DateTime(year, month, day);
+    // Reject impossible dates such as 31/02/2000
+    if (birthDate.day != day ||
+        birthDate.month != month ||
+        birthDate.year != year) {
+      return '';
+    }
+    final mm = month.toString().padLeft(2, '0');
+    final dd = day.toString().padLeft(2, '0');
+    return '$year-$mm-$dd';
   }
 
   String? validateOccupation(String? value) {
@@ -370,16 +460,20 @@ class DemoFormController extends GetxController {
   Future<void> submitForm() async {
     if (!validateStep1()) {
       List<String> missing = [];
-      if (validateFirstName(firstNameController.text) != null) missing.add('First Name');
-      if (validateLastName(lastNameController.text) != null) missing.add('Last Name');
+      if (validateFirstName(firstNameController.text) != null)
+        missing.add('First Name');
+      if (validateLastName(lastNameController.text) != null)
+        missing.add('Last Name');
       if (validateEmail(emailController.text) != null) missing.add('Email');
-      if (validateCountry(countryController.text) != null) missing.add('Country');
-      if (validatePhone(phoneController.text) != null) missing.add('Phone Number');
+      if (validateCountry(countryController.text) != null)
+        missing.add('Country');
+      if (validatePhone(phoneController.text) != null)
+        missing.add('Phone Number');
       if (validateSex(sexController.text) != null) missing.add('Sex');
       if (validateWeight(weightController.text) != null) missing.add('Weight');
       if (validateHeight(heightController.text) != null) missing.add('Height');
       if (validateDOB(dobController.text) != null) missing.add('Date of Birth');
-      
+
       Get.snackbar(
         'Validation Error',
         'Step 1 is incomplete. Please check: ${missing.join(', ')}.',
@@ -391,7 +485,8 @@ class DemoFormController extends GetxController {
 
     if (!validateStep2()) {
       List<String> missing = [];
-      if (validateOccupation(occupationController.text) != null) missing.add('Occupation');
+      if (validateOccupation(occupationController.text) != null)
+        missing.add('Occupation');
 
       Get.snackbar(
         'Validation Error',
@@ -442,6 +537,22 @@ class DemoFormController extends GetxController {
       return;
     }
 
+    // Defense in depth: only approved countries may submit a free demo form.
+    final userCountry = authController.userModel.value?.country;
+    if (!isCountryApproved(userCountry)) {
+      isSubmitting.value = false;
+      Get.snackbar(
+        'Not Available In Your Region',
+        'Please go to shop.solexnation.com/energy1 to view a current list '
+        'where AO Scan is available. Check back often! Our global frequency '
+        'community is growing rapidly.',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: AppColors.warningAmber,
+        colorText: Colors.white,
+        duration: const Duration(seconds: 4),
+      );
+      return;
+    }
 
     try {
       final email = emailController.text.trim().toLowerCase();
@@ -607,7 +718,7 @@ class DemoFormController extends GetxController {
         'weightUnit': weightUnit.value,
         'height': heightController.text.trim(),
         'heightUnit': heightUnit.value,
-        'dateOfBirth': dobController.text.trim(),
+        'dateOfBirth': formatDobForSubmit(dobController.text.trim()),
         'occupation': occupationController.text.contains("Other")
             ? otherOccupationController.text.trim()
             : occupationController.text.trim(),
@@ -629,96 +740,136 @@ class DemoFormController extends GetxController {
           .collection('demo_requests')
           .add(formData);
 
+      // Prepare API request body (Commented out for reference)
+      // final now = DateTime.now();
+      //
+      // // submittedAt format -> 2026-04-10 12:00:00
+      // final submittedAtFormatted = DateFormat(
+      //   'yyyy-MM-dd HH:mm:ss',
+      // ).format(now);
+      //
+      // // Parse DOB from DD/MM/YYYY -> YYYY-MM-DD
+      // String formattedDateOfBirth = '';
+      //
+      // try {
+      //   final dobText = dobController.text.trim();
+      //
+      //   if (dobText.isNotEmpty) {
+      //     final parts = dobText.split('/');
+      //
+      //     if (parts.length == 3) {
+      //       final day = int.parse(parts[0]);
+      //       final month = int.parse(parts[1]);
+      //       final year = int.parse(parts[2]);
+      //
+      //       final dob = DateTime(year, month, day);
+      //       formattedDateOfBirth = DateFormat('yyyy-MM-dd').format(dob);
+      //     }
+      //   }
+      // } catch (e) {
+      //   formattedDateOfBirth = '';
+      // }
+      //
+      // final apiBody = {
+      //   "firstName": firstNameController.text.trim(),
+      //   "lastName": lastNameController.text.trim(),
+      //   "country": countryController.text.trim(),
+      //   "email": email,
+      //   "phoneNumber": phoneNumber,
+      //   "sex": sexController.text.trim(),
+      //   "weight": "${weightController.text.trim()} ${weightUnit.value}",
+      //   "height": "${heightController.text.trim()} ${heightUnit.value}",
+      //   "dateOfBirth": formattedDateOfBirth,
+      //   "occupation": occupationController.text.trim(),
+      //   "concent1": consent1.value,
+      //   "concent2": consent2.value,
+      //   "concent3": consent3.value,
+      //   "concent4": consent4.value,
+      //   "concent5": consent5.value,
+      //   "message": messageController.text.trim(),
+      //   "useType": useTypeController.text.trim(),
+      //   "photoUrl": photoUrl ?? "",
+      //   "audioUrl": audioUrl ?? "",
+      //   "status": "NEW",
+      //   "submittedAt": submittedAtFormatted,
+      // };
 
-      // Prepare API request body
-      final now = DateTime.now();
-
-      // submittedAt format -> 2026-04-10 12:00:00
+      // submittedAt format -> 2026-04-10 11:27:15
       final submittedAtFormatted = DateFormat(
         'yyyy-MM-dd HH:mm:ss',
-      ).format(now);
+      ).format(DateTime.now());
 
-      // Parse DOB from DD/MM/YYYY -> YYYY-MM-DD
-      String formattedDateOfBirth = '';
-
-      try {
-        final dobText = dobController.text.trim();
-
-        if (dobText.isNotEmpty) {
-          final parts = dobText.split('/');
-
-          if (parts.length == 3) {
-            final day = int.parse(parts[0]);
-            final month = int.parse(parts[1]);
-            final year = int.parse(parts[2]);
-
-            final dob = DateTime(year, month, day);
-            formattedDateOfBirth = DateFormat('yyyy-MM-dd').format(dob);
-          }
-        }
-      } catch (e) {
-        formattedDateOfBirth = '';
-      }
-
-      final apiBody = {
+      // POST to Send Email API
+      final emailApiBody = {
         "firstName": firstNameController.text.trim(),
         "lastName": lastNameController.text.trim(),
         "country": countryController.text.trim(),
         "email": email,
-        "phoneNumber": phoneNumber,
-        "sex": sexController.text.trim(),
-        "weight": "${weightController.text.trim()} ${weightUnit.value}",
         "height": "${heightController.text.trim()} ${heightUnit.value}",
-        "dateOfBirth": formattedDateOfBirth,
-        "occupation": occupationController.text.trim(),
+        "weight": "${weightController.text.trim()} ${weightUnit.value}",
+        "occupation": occupationController.text.contains("Other")
+            ? otherOccupationController.text.trim()
+            : occupationController.text.trim(),
+        "phoneNumber": phoneNumber,
         "concent1": consent1.value,
         "concent2": consent2.value,
         "concent3": consent3.value,
         "concent4": consent4.value,
         "concent5": consent5.value,
         "message": messageController.text.trim(),
-        "useType": useTypeController.text.trim(),
+        "useType": useTypeController.text.trim().isEmpty
+            ? null
+            : useTypeController.text.trim(),
         "photoUrl": photoUrl ?? "",
         "audioUrl": audioUrl ?? "",
         "status": "NEW",
         "submittedAt": submittedAtFormatted,
+        "dateOfBirth": formatDobForApi(dobController.text.trim()),
       };
 
-      // POST to Mailchimp API
-      bool mailchimpSyncSuccess = false;
+      bool emailSyncSuccess = false;
+      if (kDebugMode) {
+        print('Email API payload: ${jsonEncode(emailApiBody)}');
+      }
       try {
         final response = await http.post(
-          Uri.parse('https://admin.aoscanglobal.com/api/add_mailchimp'),
+          Uri.parse('https://admin.aoscanglobal.com/api/send_email'),
           headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
           },
-          body: jsonEncode(apiBody),
+          body: jsonEncode(emailApiBody),
         );
 
         if (response.statusCode == 200 || response.statusCode == 201) {
           // API call successful
-          mailchimpSyncSuccess = true;
-          print('API call successful: ${response.body}');
+          emailSyncSuccess = true;
+          if (kDebugMode) {
+            print('Email API call successful: ${response.body}');
+          }
         } else {
           // API call failed but don't block the user
-          print(
-            'API call failed with status ${response.statusCode}: ${response.body}',
-          );
+          if (kDebugMode) {
+            print(
+              'Email API call failed with status ${response.statusCode}: ${response.body}',
+            );
+          }
         }
       } catch (e) {
         // API call error but don't block the user
-        print('API call error: $e');
+        if (kDebugMode) {
+          print('Email API call error: $e');
+        }
       }
 
-      // Update Firestore with Mailchimp sync status if failed
-      if (!mailchimpSyncSuccess) {
+      // Update Firestore with Email sync status if failed
+      if (!emailSyncSuccess) {
         try {
-          await docRef.update({
-            'mailchimpSyncStatus': 'Mailchimp Sync Pending',
-          });
+          await docRef.update({'emailSyncStatus': 'Email Sync Pending'});
         } catch (e) {
-          print('Failed to update mailchimpSyncStatus: $e');
+          if (kDebugMode) {
+            print('Failed to update emailSyncStatus: $e');
+          }
         }
       }
 

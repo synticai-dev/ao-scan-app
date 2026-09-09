@@ -1,6 +1,7 @@
 import 'package:ao_scan_app/controllers/auth_controller.dart';
 import 'package:ao_scan_app/utils/app_colors.dart';
 import 'package:ao_scan_app/utils/app_textstyle.dart';
+import 'package:ao_scan_app/views/screens/auth/otp_verification_screen.dart';
 import 'package:ao_scan_app/views/widgets/phone_number_field.dart';
 import 'package:country_picker/country_picker.dart';
 import 'package:flutter/material.dart';
@@ -47,6 +48,13 @@ class RegisterScreen extends StatelessWidget {
     "Dentist",
     "Other",
   ];
+
+  /// Builds an E.164 phone number like +15551234567 from the selected country
+  /// code prefix and the local number entered by the user.
+  String _toE164(String countryCode, String localNumber) {
+    final digits = localNumber.replaceAll(RegExp(r'[^\d]'), '');
+    return '$countryCode$digits';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -271,9 +279,16 @@ class RegisterScreen extends StatelessWidget {
                     width: double.infinity,
                     height: 55,
                     child: ElevatedButton(
-                      onPressed: () {
+                      onPressed: () async {
                         if (_formKey.currentState!.validate()) {
-                          _authController.register(
+                          final e164Phone = _toE164(
+                            _phoneCountryCode.value,
+                            _phoneController.text.trim(),
+                          );
+                          final formattedPhone =
+                              '${_phoneCountryCode.value} ${_phoneController.text.trim()}';
+                          final started =
+                              await _authController.startPhoneVerification(
                             email: _emailController.text.trim(),
                             password: _passwordController.text.trim(),
                             firstName: _firstNameController.text.trim(),
@@ -284,21 +299,26 @@ class RegisterScreen extends StatelessWidget {
                                 ? _otherOccupationController.text.trim()
                                 : _occupationController.text.trim(),
                             country: _countryController.text.trim(),
-                            phoneNumber:
-                                '${_phoneCountryCode.value} ${_phoneController.text.trim()}',
+                            phoneNumber: formattedPhone,
                             sex: _sexController.text.trim(),
+                            e164Phone: e164Phone,
                           );
+                          if (started) {
+                            Get.to(() => const OtpVerificationScreen());
+                          }
                         }
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: _authController.isLoading.value
+                        backgroundColor: (_authController.isLoading.value ||
+                                _authController.isSendingOtp.value)
                             ? AppColors.borderLight
                             : AppColors.buttonPrimary,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
-                      child: _authController.isLoading.value
+                      child: (_authController.isLoading.value ||
+                              _authController.isSendingOtp.value)
                           ? const CircularProgressIndicator(
                               color: Color.fromARGB(159, 58, 82, 163),
                             )
