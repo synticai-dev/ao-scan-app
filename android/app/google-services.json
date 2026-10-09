@@ -12,7 +12,36 @@
           "package_name": "com.aoscanglobal.aoscanapp"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "926223499030-0hjq7963c8b3ksrsabo9q6726jfro54b.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.aoscanglobal.aoscanapp",
+            "certificate_hash": "b5beed53d3b52663ba7fa667e1606adcfd4304a9"
+          }
+        },
+        {
+          "client_id": "926223499030-8q80fbraj62fp3igqaerjku1hv9q1729.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.aoscanglobal.aoscanapp",
+            "certificate_hash": "b83335524ee9737d8b92fec22505b1ff8781562d"
+          }
+        },
+        {
+          "client_id": "926223499030-sjulptqr31bqfb6v1mo7ukirlvucpr6b.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.aoscanglobal.aoscanapp",
+            "certificate_hash": "179b16e1de4aace307310f5f880f57d5d3566e61"
+          }
+        },
+        {
+          "client_id": "926223499030-2ic0f3t9971mlgbaki09r97fg4dhfvfk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBbij4eUyO-fcFBrEpA1bwL2-nOHdc-yMQ"
@@ -20,7 +49,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "926223499030-2ic0f3t9971mlgbaki09r97fg4dhfvfk.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "926223499030-lr73rfq73uuebvokf4chc301hocq9l1m.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.aoscanglobal.aoscanapp"
+              }
+            }
+          ]
         }
       }
     }

@@ -398,8 +398,9 @@ class Step1ContactInfo extends StatelessWidget {
     required TextEditingController controller,
     String? Function(String?)? validator,
   }) {
+    final canonicalValue = ApprovedCountries.canonicalName(controller.text);
     return DropdownButtonFormField<String>(
-      initialValue: controller.text.isEmpty ? null : controller.text,
+      initialValue: canonicalValue,
       decoration: InputDecoration(
         labelText: 'Country *',
         labelStyle: AppTextStyle.regular(fontSize: 14, color: Colors.black87),

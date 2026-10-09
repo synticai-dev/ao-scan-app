@@ -477,6 +477,7 @@ class AuthController extends GetxController {
           if (!completer.isCompleted) completer.complete(true);
         },
         verificationFailed: (FirebaseAuthException e) {
+          debugPrint('verifyPhoneNumber failed: [${e.code}] ${e.message}');
           isSendingOtp.value = false;
           Get.snackbar('Error', _friendlyPhoneError(e));
           _autoVerifiedCredential = null;
@@ -498,12 +499,29 @@ class AuthController extends GetxController {
       // arrives (this also covers slow carrier delivery edge cases).
       return await completer.future
           .timeout(const Duration(seconds: 70), onTimeout: () => false);
-    } catch (e) {
+    } on Exception catch (e) {
+      debugPrint('Phone verification error: $e');
       isSendingOtp.value = false;
-      Get.snackbar(
-        'Error',
-        'Failed to send verification code. Please try again.',
-      );
+      // Catch native platform errors (e.g. missing APNs / GoogleService config)
+      // so the app doesn't hard-crash. The most common cause on iOS is a
+      // missing CLIENT_ID in GoogleService-Info.plist or APNs not configured.
+      final message = e.toString().toLowerCase();
+      if (message.contains('nil') ||
+          message.contains('apns') ||
+          message.contains('client') ||
+          message.contains('platform')) {
+        Get.snackbar(
+          'Configuration Error',
+          'Phone verification is not available. Please ensure notifications '
+          'are enabled and try again on a physical device.',
+        );
+      } else {
+        Get.snackbar(
+          'Error',
+          'Failed to send verification code. Please try again.',
+        );
+      }
+      if (!completer.isCompleted) completer.complete(false);
       return false;
     }
   }
@@ -596,6 +614,10 @@ class AuthController extends GetxController {
         return 'Too many verification attempts. Please wait a few minutes and try again.';
       case 'quota-exceeded':
         return 'Verification service is temporarily unavailable. Please try again later.';
+      case 'invalid-app-credential':
+      case 'missing-client-identifier':
+      case 'captcha-check-failed':
+        return 'Device verification failed. Please ensure notifications are enabled or try on a physical device.';
       default:
         return e.message ?? 'Phone verification failed. Please try again.';
     }

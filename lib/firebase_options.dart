@@ -60,9 +60,9 @@ class DefaultFirebaseOptions {
     messagingSenderId: '926223499030',
     projectId: 'ao-scan-global-companion',
     storageBucket: 'ao-scan-global-companion.firebasestorage.app',
+    iosClientId: '926223499030-lr73rfq73uuebvokf4chc301hocq9l1m.apps.googleusercontent.com',
     iosBundleId: 'com.aoscanglobal.aoscanapp',
   );
-
   static const FirebaseOptions macos = FirebaseOptions(
     apiKey: 'AIzaSyCS28a1zTFwzff1xZCzUUn0yhKq3QRvgBs',
     appId: '1:926223499030:ios:32675285dd4d6131f59a37',

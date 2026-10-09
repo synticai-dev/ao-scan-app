@@ -48,11 +48,15 @@ post_install do |installer|
     flutter_additional_ios_build_settings(target)
   end
 
-  # Strip arm64e slices from frameworks to fix App Store validation error:
-  # "objective_c.framework bundle contains only the arm64e architecture slice"
+  # Ensure all targets have minimum deployment target of 15.0 and strip arm64e
   installer.pods_project.targets.each do |target|
     target.build_configurations.each do |config|
+      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.0'
       config.build_settings['EXCLUDED_ARCHS[sdk=iphoneos*]'] = 'arm64e'
     end
+  end
+
+  Dir.glob(File.join(__dir__, 'Pods', 'Target Support Files', '**', '*.sh')).each do |script|
+    File.chmod(0755, script)
   end
 end

@@ -1,3 +1,4 @@
+import 'package:ao_scan_app/firebase_options.dart';
 import 'package:ao_scan_app/controllers/demo_form_controller.dart';
 import 'package:ao_scan_app/views/screens/splash_screen.dart';
 import 'package:ao_scan_app/controllers/auth_controller.dart';
@@ -10,7 +11,9 @@ import 'package:ao_scan_app/utils/analytics_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
   // Log app open
@@ -38,6 +41,24 @@ class MyApp extends StatelessWidget {
       home: SplashScreen(),
       debugShowCheckedModeBanner: false,
       navigatorObservers: [AnalyticsService.getObserver()],
+      onGenerateRoute: (settings) {
+        if (settings.name != null && settings.name!.startsWith('/link')) {
+          // Handled deep link / reCAPTCHA redirect from Firebase Auth
+          return PageRouteBuilder(
+            settings: settings,
+            pageBuilder: (_, __, ___) => const SizedBox.shrink(),
+            transitionDuration: Duration.zero,
+          );
+        }
+        return null;
+      },
+      onUnknownRoute: (settings) {
+        return PageRouteBuilder(
+          settings: settings,
+          pageBuilder: (_, __, ___) => const SizedBox.shrink(),
+          transitionDuration: Duration.zero,
+        );
+      },
     );
   }
 }

@@ -47,10 +47,10 @@ class DemoFormController extends GetxController {
           validateDOB(profileDob) == null ? formatDobForSubmit(profileDob) : '';
       occupationController.text = user.occupation ?? '';
       // Only prefill a country that is in the approved list — the demo-form
-      // dropdown only lists the 12 approved countries, so any other value
+      // dropdown only lists approved countries, so any other value
       // would leave the dropdown in an invalid state.
       countryController.text =
-          isCountryApproved(user.country) ? (user.country ?? '') : '';
+          ApprovedCountries.canonicalName(user.country) ?? '';
       sexController.text = user.sex ?? '';
 
       // Handle phone number splitting
