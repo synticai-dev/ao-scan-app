@@ -109,15 +109,9 @@ class Step1ContactInfo extends StatelessWidget {
                       _buildTextField(
                         controller: controller.dobController,
                         label: 'Date of Birth *',
-                        // Calendar only when the profile DOB is missing,
-                        // invalid or under-18; otherwise locked (display only).
-                        suffixIcon: controller.isProfileDobValid
-                            ? null
-                            : const Icon(Icons.calendar_today),
+                        suffixIcon: const Icon(Icons.calendar_today),
                         readOnly: true,
-                        onTap: controller.isProfileDobValid
-                            ? null
-                            : () => _selectDate(context),
+                        onTap: () => _selectDate(context),
                         validator: controller.validateDOB,
                       ),
                       const SizedBox(height: 15),

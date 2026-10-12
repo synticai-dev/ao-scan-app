@@ -13,12 +13,8 @@ class RegisterScreen extends StatelessWidget {
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
   final _emailController = TextEditingController();
-  final _dobController = TextEditingController();
-  final _occupationController = TextEditingController();
   final _countryController = TextEditingController();
   final _phoneController = TextEditingController();
-  final _sexController = TextEditingController();
-  final _otherOccupationController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   final _authController = Get.find<AuthController>();
@@ -26,28 +22,6 @@ class RegisterScreen extends StatelessWidget {
   final RxBool _isConfirmPasswordVisible = false.obs;
   final RxString _phoneCountryCode = '+1'.obs;
   final _formKey = GlobalKey<FormState>();
-
-  static const List<String> occupations = [
-    "Doctor",
-    "Mom",
-    "Affiliate Marketer",
-    "Influencer",
-    "Naturopath",
-    "Chiropractor",
-    "Biohacker",
-    "Energy Healer",
-    "Health Coach",
-    "Holistic Practitioner",
-    "Life Coach",
-    "Massage Therapist",
-    "Wellness Enthusiast",
-    "Personal Trainer",
-    "Emotion Code Practitioner",
-    "Physical Therapist",
-    "Veterinarian",
-    "Dentist",
-    "Other",
-  ];
 
   /// Builds an E.164 phone number like +15551234567 from the selected country
   /// code prefix and the local number entered by the user.
@@ -124,63 +98,6 @@ class RegisterScreen extends StatelessWidget {
                 ),
                 SizedBox(height: size.height * 0.02),
                 _buildTextField(
-                  controller: _dobController,
-                  label: 'Date of Birth',
-                  hint: 'Select your birth date',
-                  readOnly: true,
-                  onTap: () async {
-                    final DateTime now = DateTime.now();
-                    final DateTime lastDate = DateTime(
-                      now.year - 18,
-                      now.month,
-                      now.day,
-                    );
-                    final DateTime? picked = await showDatePicker(
-                      context: context,
-                      initialDate: lastDate,
-                      firstDate: DateTime(1900),
-                      lastDate: lastDate,
-                    );
-                    if (picked != null) {
-                      _dobController.text =
-                          '${picked.day}/${picked.month}/${picked.year}';
-                    }
-                  },
-                  suffixIcon: const Icon(Icons.calendar_today, size: 20),
-                  validator: (value) => value == null || value.isEmpty
-                      ? 'Date of birth is required'
-                      : null,
-                ),
-                SizedBox(height: size.height * 0.02),
-                _buildDropdown(
-                  controller: _occupationController,
-                  label: 'Occupation (I am...)',
-                  items: occupations,
-                  validator: (value) => value == null || value.isEmpty
-                      ? 'Occupation is required'
-                      : null,
-                ),
-                ValueListenableBuilder(
-                  valueListenable: _occupationController,
-                  builder: (context, value, child) {
-                    return _occupationController.text.contains("Other")
-                        ? Padding(
-                            padding: const EdgeInsets.only(top: 16),
-                            child: _buildTextField(
-                              controller: _otherOccupationController,
-                              label: 'Other Occupation',
-                              hint: 'Enter your occupation',
-                              validator: (value) =>
-                                  value == null || value.isEmpty
-                                  ? 'Please enter your occupation'
-                                  : null,
-                            ),
-                          )
-                        : const SizedBox.shrink();
-                  },
-                ),
-                SizedBox(height: size.height * 0.02),
-                _buildTextField(
                   controller: _countryController,
                   label: 'Country',
                   hint: 'Select your country',
@@ -211,15 +128,6 @@ class RegisterScreen extends StatelessWidget {
                     }
                     return null;
                   },
-                ),
-                SizedBox(height: size.height * 0.02),
-                _buildDropdown(
-                  controller: _sexController,
-                  label: 'Sex *',
-                  items: const ['Male', 'Female'],
-                  validator: (value) => value == null || value.isEmpty
-                      ? 'Sex is required'
-                      : null,
                 ),
                 SizedBox(height: size.height * 0.02),
                 Obx(
@@ -293,14 +201,8 @@ class RegisterScreen extends StatelessWidget {
                             password: _passwordController.text.trim(),
                             firstName: _firstNameController.text.trim(),
                             lastName: _lastNameController.text.trim(),
-                            dob: _dobController.text.trim(),
-                            occupation:
-                                _occupationController.text.contains("Other")
-                                ? _otherOccupationController.text.trim()
-                                : _occupationController.text.trim(),
                             country: _countryController.text.trim(),
                             phoneNumber: formattedPhone,
-                            sex: _sexController.text.trim(),
                             e164Phone: e164Phone,
                           );
                           if (started) {
@@ -409,59 +311,6 @@ class RegisterScreen extends StatelessWidget {
         fillColor: Colors.grey.shade100,
         errorStyle: AppTextStyle.regular(fontSize: 12, color: Colors.red),
       ),
-      validator: validator,
-      autovalidateMode: AutovalidateMode.onUserInteraction,
-    );
-  }
-
-  Widget _buildDropdown({
-    required TextEditingController controller,
-    required String label,
-    required List<String> items,
-    String? Function(String?)? validator,
-  }) {
-    return DropdownButtonFormField<String>(
-      initialValue: controller.text.isEmpty ? null : controller.text,
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: AppTextStyle.regular(
-          fontSize: 14,
-          color: AppColors.textSecondary,
-        ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: AppColors.borderLight),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: AppColors.borderLight),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(
-            color: AppColors.buttonPrimary,
-            width: 2,
-          ),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Colors.red),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Colors.red, width: 2),
-        ),
-        suffixIcon: const Icon(Icons.arrow_drop_down),
-        filled: true,
-        fillColor: AppColors.backgroundWhite,
-        errorStyle: AppTextStyle.regular(fontSize: 12, color: Colors.red),
-      ),
-      items: items.map((String item) {
-        return DropdownMenuItem<String>(value: item, child: Text(item));
-      }).toList(),
-      onChanged: (String? value) {
-        controller.text = value ?? '';
-      },
       validator: validator,
       autovalidateMode: AutovalidateMode.onUserInteraction,
     );
