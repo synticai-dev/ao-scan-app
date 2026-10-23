@@ -122,11 +122,11 @@ class AuthController extends GetxController {
     required String password,
     required String firstName,
     required String lastName,
-    required String dob,
-    required String occupation,
+    String dob = '',
+    String occupation = '',
     required String country,
     required String phoneNumber,
-    required String sex,
+    String sex = '',
     PhoneAuthCredential? phoneCredential,
   }) async {
     bool verifiedPhone = false;
@@ -356,11 +356,11 @@ class AuthController extends GetxController {
     required String password,
     required String firstName,
     required String lastName,
-    required String dob,
-    required String occupation,
+    String dob = '',
+    String occupation = '',
     required String country,
     required String phoneNumber,
-    required String sex,
+    String sex = '',
     required String e164Phone,
   }) async {
     // Store the registration data while the user verifies their phone

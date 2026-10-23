@@ -72,14 +72,6 @@ class DemoFormController extends GetxController {
     }
   }
 
-  /// True when the profile already has a valid 18+ date of birth.
-  /// The Step 1 DOB field is then locked (display only) - it can only be
-  /// edited when the profile DOB is missing, invalid or under-18.
-  bool get isProfileDobValid {
-    final dob = authController.userModel.value?.dob?.trim() ?? '';
-    return validateDOB(dob) == null;
-  }
-
   // Step 1: Contact Information
   final firstNameController = TextEditingController();
   final lastNameController = TextEditingController();

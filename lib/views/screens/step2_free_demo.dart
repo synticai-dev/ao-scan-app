@@ -36,6 +36,11 @@ class Step2FreeDemo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final savedOccupation = controller.occupationController.text.trim();
+    if (savedOccupation.isNotEmpty && !occupations.contains(savedOccupation)) {
+      controller.otherOccupationController.text = savedOccupation;
+      controller.occupationController.text = 'Other';
+    }
     final size = MediaQuery.of(context).size;
     return Scaffold(
       backgroundColor: AppColors.backgroundWhite,
@@ -83,7 +88,6 @@ class Step2FreeDemo extends StatelessWidget {
                         label: 'Occupation (I am...)',
                         items: occupations,
                         validator: controller.validateOccupation,
-                        readOnly: controller.authController.userModel.value != null,
                       ),
                       const SizedBox(height: 16),
                       ValueListenableBuilder(
